@@ -118,7 +118,7 @@ def main():
             texte_en_clair = input("Entrez le texte à chiffrer : ")
         message_chiffré = encrypt((n, e), texte_en_clair)
 
-        if args.output:  # Check if output file is specified
+        if args.output:
             with open(args.output, "w") as output_file:
                 output_file.write("Cryptogramme : " + message_chiffré)
         else:
@@ -138,7 +138,7 @@ def main():
         message_chiffré = [int(caractère) for caractère in message_chiffré.split()]
         message_déchiffré = decrypt((n, d), message_chiffré)
 
-        if args.output:  # Check if output file is specified
+        if args.output:
             with open(args.output, "w") as output_file:
                 output_file.write("Texte en clair : " + message_déchiffré)
         else:
