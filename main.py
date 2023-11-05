@@ -8,12 +8,18 @@ parser = argparse.ArgumentParser(description='Générer des clés RSA')
 
 # Ajouter les arguments
 parser.add_argument('-f', '--filename', type=str, default='monRSA', help='Le nom de fichier à utiliser pour les clés')
+parser.add_argument('-s', '--size', type=int, default=10, help='La taille de la clé à générer')
+parser.add_argument('-i', '--input', type=str, help='Le fichier à crypter ou décrypter')
+parser.add_argument('-o', '--output', type=str, help='Le nom du fichier de sortie')
 
 # Analyser les arguments
 args = parser.parse_args()
 
-# Utiliser l'argument filename
+# Utiliser les arguments
 filename = args.filename
+size = args.size
+input_file = args.input
+output_file = args.output
 
 # Vérifie si un nombre est premier
 def is_prime(num):
@@ -80,7 +86,7 @@ def generate_random_prime(bits):
 def main():
     commande = input("Commande : ")
     if commande == "keygen":
-        bits = 10  # Ajustez la taille de la clé (recommandé : 2048 bits ou plus)
+        bits = args.size
         p = generate_random_prime(bits)
         print("p =", p)
         q = generate_random_prime(bits)
@@ -105,9 +111,18 @@ def main():
             n = int.from_bytes(base64.b64decode(lines[1].strip()), byteorder='big')
             e = int.from_bytes(base64.b64decode(lines[2].strip()), byteorder='big')
 
-        texte_en_clair = input("Entrez le texte à chiffrer : ")
+        if args.input:
+            with open(args.input, "r") as input_file:
+                texte_en_clair = input_file.read()
+        else:
+            texte_en_clair = input("Entrez le texte à chiffrer : ")
         message_chiffré = encrypt((n, e), texte_en_clair)
-        print("Cryptogramme :", message_chiffré)
+
+        if args.output:  # Check if output file is specified
+            with open(args.output, "w") as output_file:
+                output_file.write("Cryptogramme : " + message_chiffré)
+        else:
+            print("Cryptogramme :", message_chiffré)
 
     elif commande == "decrypt":
         with open(f"{filename}.priv", "r") as priv_file:
@@ -115,10 +130,19 @@ def main():
             n = int.from_bytes(base64.b64decode(lines[1].strip()), byteorder='big')
             d = int.from_bytes(base64.b64decode(lines[2].strip()), byteorder='big')
 
-        message_chiffré = input("Entrez le cryptogramme : ")
+        if args.input:
+            with open(args.input, "r") as input_file:
+                message_chiffré = input_file.read()
+        else:
+            message_chiffré = input("Entrez le cryptogramme : ")
         message_chiffré = [int(caractère) for caractère in message_chiffré.split()]
         message_déchiffré = decrypt((n, d), message_chiffré)
-        print("Texte en clair :", message_déchiffré)
+
+        if args.output:  # Check if output file is specified
+            with open(args.output, "w") as output_file:
+                output_file.write("Texte en clair : " + message_déchiffré)
+        else:
+            print("Texte en clair :", message_déchiffré)
 
     elif commande == "help":
         print("Syntaxe :")
